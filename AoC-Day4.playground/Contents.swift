@@ -2,7 +2,7 @@ import UIKit
 
 let url = Bundle.main.url(forResource: "data", withExtension: "txt")!
 let data = try! String(contentsOf: url)
-var inputs = data.replacingOccurrences(of: "\n\n", with: "?").split(separator: "?")
+var inputs = data.components(separatedBy: "\n\n")
 
 // Matches and returns the match and capture groups
 extension String {
