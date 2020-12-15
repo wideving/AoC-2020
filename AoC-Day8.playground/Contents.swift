@@ -90,6 +90,11 @@ func runInstruction(_ instructions: [Instruction]) {
     runInstruction(instructions)
 }
 
+//Day 8
+//runInstruction(instructions)
+
+
+//Day 8.5
 func reset() {
     accumulator = 0
     index = 0
