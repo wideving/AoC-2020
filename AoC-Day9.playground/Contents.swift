@@ -7,18 +7,19 @@ var inputs = data.components(separatedBy: "\n").dropLast().compactMap { Int($0) 
 let preambleCount = 25
 let sumIndex = 25 //First index after preamble
 
+var weakness = 0
 
 //Day9
 func findSum(numbers: [Int], sum: Int) -> Bool {
     for i in 0..<numbers.count {
         for j in 0..<numbers.count {
             if numbers[i] + numbers[j] == sum && numbers[i] != numbers[j] {
-                print("Found match \(numbers[i]) + \(numbers[j]) is \(sum)")
                 return false
             }
         }
     }
     print("Weakness is: \(sum)")
+    weakness = sum
     return true
 }
 
@@ -36,10 +37,25 @@ while (!foundWeakness && inputs.count > sumIndex) {
     }
 }
 
-
-
 //Day9.5
-let weakness = 217430975
-var numbers = Array(inputs.split(separator: 217430975)[0])
+let numbers = data
+    .components(separatedBy: "\n")
+    .dropLast()
+    .compactMap { Int($0) }
+    .split(separator: weakness)[0]
 
 
+
+outer: for i in 400..<numbers.count {
+    var sum = 0
+    var contigiousNumbers = [Int]()
+    for j in i..<numbers.count {
+        contigiousNumbers.append(numbers[j])
+        sum += numbers[j]
+        if sum == weakness {
+            let sort = contigiousNumbers.sorted()
+            print("Weakness is: \(sort.first! + sort.last!)")
+            break outer
+        }
+    }
+}
