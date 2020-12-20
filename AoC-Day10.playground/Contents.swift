@@ -3,7 +3,7 @@ import UIKit
 let url = Bundle.main.url(forResource: "data", withExtension: "txt")!
 let data = try! String(contentsOf: url)
 var inputs = data.components(separatedBy: "\n").compactMap { Int($0) }.sorted()
-
+print(inputs)
 var differences = [Int: Int]()
 differences[inputs[0]] = 1
 differences[3] = 1
@@ -24,6 +24,15 @@ if let ones = differences[1], let threes = differences[3] {
     print("Ones or threes are missing")
 }
 
-//Day 10.5
+
+
+//Day 10.5 not complete
+func findCombinations(_ joltage: Int) -> [Int] {
+    inputs.filter { $0 >= (joltage + 1) && $0 <= (joltage + 3) }
+}
+
+
+
+
 
 
