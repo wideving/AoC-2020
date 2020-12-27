@@ -98,7 +98,7 @@ class Ship {
 }
 
 let ship = Ship(compass: Compass(), navigationInstructions: inputs)
-ship.travelToEndDestination { (position) in
+ship.travelToEndDestination { position in
     print(abs(position.x) + abs(position.y))
 }
 
