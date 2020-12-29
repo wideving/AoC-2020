@@ -92,6 +92,7 @@ func findOrCreateCubeOnBoard(position: Position) -> (position: Position, cube: C
         return (position, cube)
     } else {
         let cube = Cube()
+        board[position] = cube
         return (position, cube)
     }
 }
@@ -101,11 +102,10 @@ var iteration = 0
 while iteration < 6 {
     var newBoard = [Position: Cube]()
     board.forEach { outerPosition, outerCube in
-        let neighbours = getNeighbours(position: outerPosition)
-        neighbours.forEach { (position, cube) in
-            newBoard[position] = cube
-        }
+        getNeighbours(position: outerPosition)
     }
+    
+    newBoard = board
     
 
     newBoard.forEach { position, cube in
