@@ -6,145 +6,92 @@ var initialInput: [[State]] = data.components(separatedBy: "\n").dropLast().comp
     $0.map { $0 == "." ? .inactive : .active}
 }
 
-enum State: CustomStringConvertible {
+enum State {
     case active
     case inactive
-    
-    var description: String {
-        switch self {
-        case .active: return "#"
-        case .inactive: return "."
-        }
-    }
 }
 
-struct Cube: CustomStringConvertible {
-    var state: State
-
-    init(initialState: State = .inactive) {
-        self.state = initialState
-    }
-    
-    var description: String {
-        return state.description
-    }
-}
-
-struct Position:  Equatable, Hashable, CustomStringConvertible {
+struct Position: Equatable, Hashable, CustomStringConvertible {
     let x: Int
     let y: Int
     let z: Int
     
     var description: String {
-        "x: \(x), y: \(y), z: \(z)"
+        "(x: \(x), y: \(y), z: \(z))"
     }
 }
 
-var board = [Position: Cube]()
+var activeCubes = Set<Position>()
 
-initialInput.enumerated().forEach { rowIndex, row in
-    print(row)
-    row.enumerated().forEach { (columnIndex, state) in
-        board[Position(x: columnIndex, y: rowIndex, z: 0)] = Cube(initialState: state)
+initialInput.enumerated().forEach { y, row in
+    row.enumerated().forEach { x, state in
+        if state == .active {
+            activeCubes.insert(Position(x: x, y: y, z: 0))
+        }
     }
 }
 
-func getNeighbours(position: Position) -> [(position: Position, cube: Cube)] {
-    var neighbours = [(position: Position, cube: Cube)]()
-    
-    // Mid section
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x - 1, y: position.y,     z: position.z))) // Mid Left
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x - 1, y: position.y - 1, z: position.z))) // Mid Top Left
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x,     y: position.y - 1, z: position.z))) // Mid Top
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x + 1, y: position.y - 1, z: position.z))) // Mid Top Right
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x + 1, y: position.y,     z: position.z))) // Mid Right
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x + 1, y: position.y + 1, z: position.z))) // Mid Bottom Right
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x,     y: position.y + 1, z: position.z))) // Mid Bottom
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x - 1, y: position.y + 1, z: position.z))) // Mid Bottom Left
+func getNeighbours(position: Position) -> Set<Position> {
+    var neighbours = Set<Position>()
+    neighbours.insert(Position(x: position.x - 1, y: position.y,     z: position.z)) // Mid Left
+    neighbours.insert(Position(x: position.x - 1, y: position.y - 1, z: position.z)) // Mid Top Left
+    neighbours.insert(Position(x: position.x,     y: position.y - 1, z: position.z)) // Mid Top
+    neighbours.insert(Position(x: position.x + 1, y: position.y - 1, z: position.z)) // Mid Top Right
+    neighbours.insert(Position(x: position.x + 1, y: position.y,     z: position.z)) // Mid Right
+    neighbours.insert(Position(x: position.x + 1, y: position.y + 1, z: position.z)) // Mid Bottom Right
+    neighbours.insert(Position(x: position.x,     y: position.y + 1, z: position.z)) // Mid Bottom
+    neighbours.insert(Position(x: position.x - 1, y: position.y + 1, z: position.z)) // Mid Bottom Left
     
     // Front Section
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x - 1, y: position.y,     z: position.z + 1))) // Front Left
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x - 1, y: position.y - 1, z: position.z + 1))) // Front Top Left
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x,     y: position.y - 1, z: position.z + 1))) // Front Top
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x + 1, y: position.y - 1, z: position.z + 1))) // Front Top Right
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x + 1, y: position.y,     z: position.z + 1))) // Front Right
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x + 1, y: position.y + 1, z: position.z + 1))) // Front Bottom Right
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x,     y: position.y + 1, z: position.z + 1))) // Front Bottom
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x - 1, y: position.y + 1, z: position.z + 1))) // Front Bottom Left
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x,     y: position.y,     z: position.z + 1))) // Front Center
+    neighbours.insert(Position(x: position.x - 1, y: position.y,     z: position.z + 1)) // Front Left
+    neighbours.insert(Position(x: position.x - 1, y: position.y - 1, z: position.z + 1)) // Front Top Left
+    neighbours.insert(Position(x: position.x,     y: position.y - 1, z: position.z + 1)) // Front Top
+    neighbours.insert(Position(x: position.x + 1, y: position.y - 1, z: position.z + 1)) // Front Top Right
+    neighbours.insert(Position(x: position.x + 1, y: position.y,     z: position.z + 1)) // Front Right
+    neighbours.insert(Position(x: position.x + 1, y: position.y + 1, z: position.z + 1)) // Front Bottom Right
+    neighbours.insert(Position(x: position.x,     y: position.y + 1, z: position.z + 1)) // Front Bottom
+    neighbours.insert(Position(x: position.x - 1, y: position.y + 1, z: position.z + 1)) // Front Bottom Left
+    neighbours.insert(Position(x: position.x,     y: position.y,     z: position.z + 1)) // Front Center
     
     // Back Section
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x - 1, y: position.y,     z: position.z - 1))) // Back Left
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x - 1, y: position.y - 1, z: position.z - 1))) // Back Top Left
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x,     y: position.y - 1, z: position.z - 1))) // Back Top
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x + 1, y: position.y - 1, z: position.z - 1))) // Back Top Right
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x + 1, y: position.y,     z: position.z - 1))) // Back Right
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x + 1, y: position.y + 1, z: position.z - 1))) // Back Bottom Right
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x,     y: position.y + 1, z: position.z - 1))) // Back Bottom
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x - 1, y: position.y + 1, z: position.z - 1))) // Back Bottom Left
-    neighbours.append(findOrCreateCubeOnBoard(position: Position(x: position.x,     y: position.y,     z: position.z - 1))) // Back Center
-    
+    neighbours.insert(Position(x: position.x - 1, y: position.y,     z: position.z - 1)) // Back Left
+    neighbours.insert(Position(x: position.x - 1, y: position.y - 1, z: position.z - 1)) // Back Top Left
+    neighbours.insert(Position(x: position.x,     y: position.y - 1, z: position.z - 1)) // Back Top
+    neighbours.insert(Position(x: position.x + 1, y: position.y - 1, z: position.z - 1)) // Back Top Right
+    neighbours.insert(Position(x: position.x + 1, y: position.y,     z: position.z - 1)) // Back Right
+    neighbours.insert(Position(x: position.x + 1, y: position.y + 1, z: position.z - 1)) // Back Bottom Right
+    neighbours.insert(Position(x: position.x,     y: position.y + 1, z: position.z - 1)) // Back Bottom
+    neighbours.insert(Position(x: position.x - 1, y: position.y + 1, z: position.z - 1)) // Back Bottom Left
+    neighbours.insert(Position(x: position.x,     y: position.y,     z: position.z - 1)) // Back Center
     return neighbours
-}
-
-func findOrCreateCubeOnBoard(position: Position) -> (position: Position, cube: Cube) {
-    if let cube = board[position] {
-        return (position, cube)
-    } else {
-        let cube = Cube()
-        board[position] = cube
-        return (position, cube)
-    }
 }
 
 var iteration = 0
 
 while iteration < 6 {
-    var newBoard = [Position: Cube]()
-    board.forEach { outerPosition, outerCube in
-        getNeighbours(position: outerPosition)
+    var newActiveCubes = Set<Position>()
+    var neighbours = Set<Position>()
+    activeCubes.forEach {
+        neighbours.formUnion(getNeighbours(position: $0).subtracting(activeCubes))
     }
     
-    newBoard = board
-    
+    neighbours.forEach {
+        if getNeighbours(position: $0).intersection(activeCubes).count == 3 {
+            newActiveCubes.insert($0)
+        }
+    }
 
-    newBoard.forEach { position, cube in
-        let neighbours = getNeighbours(position: position)
-        let activeNeighbours = neighbours.reduce(0) {
-            $0 + ($1.cube.state == .active ? 1 : 0)
-        }
+    activeCubes.forEach {
+        let aliveNeighbours = getNeighbours(position: $0).intersection(activeCubes)
+        let count = aliveNeighbours.count
         
-        switch cube.state {
-        case .active:
-            if activeNeighbours < 2 || activeNeighbours > 3 {
-                newBoard[position] = Cube(initialState: .inactive)
-            } else {
-                newBoard[position] = cube
-            }
-        case .inactive:
-            if activeNeighbours == 3 {
-                newBoard[position] = Cube(initialState: .active)
-            } else {
-                newBoard[position] = cube
-            }
+        if  count >= 2 && count <= 3 {
+            newActiveCubes.insert($0)
         }
     }
-    
-    board = newBoard
+
+    activeCubes = newActiveCubes
     iteration += 1
 }
 
-print(board.values.reduce(0, {$0 + ($1.state == .active ? 1 : 0)}))
-
-
-
-
-
-
-
-
-
-
-
-
-
+print(activeCubes.count)
